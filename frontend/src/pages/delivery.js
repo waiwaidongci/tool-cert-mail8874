@@ -21,12 +21,5 @@ export async function deliveryPage() {
       return download;
     }},
   ], runs.filter(row=>row.status==='complete'), {caption:'可导出的结果', empty:'完成计算后会生成对应的报告。'});
-  const delivery = spec.scheduled ? panel('站内分发回执', table([
-    {key:'recipient',label:'收件团队'},
-    {label:'回执',render:row=>pill(row.state==='delivered'?'已投递':'已拦截',row.state)},
-    {key:'detail',label:'说明'}, {label:'时间',render:row=>date(row.created_at)},
-    {label:'查看',render:row=>link(`运行 ${row.run_id}`,`#results/${row.run_id}`)},
-  ],await workspace.deliveries(),{caption:'站内收件箱',empty:'计划到时执行，回执将在此更新。'})) : null;
-  return el('div',{}, panel(spec.pages[5], p('按运行批次下载 CSV，复核状态随报告保留。','subtle'), artifacts, message),
-    delivery);
+  return el('div',{}, panel(spec.pages[5], p('按运行批次下载偏差区间 CSV，复核状态随报告保留。','subtle'), artifacts, message));
 }

@@ -67,8 +67,7 @@ def parse_rows(text):
         raise ValueError(f'CSV 第 {reader.line_num} 行附近格式不正确') from None
     if not rows:
         raise ValueError('CSV 至少需要一行有效数据')
-    if hasattr(analysis, 'validate_rows'):
-        analysis.validate_rows(rows)
+    analysis.validate_rows(rows)
     return rows
 
 

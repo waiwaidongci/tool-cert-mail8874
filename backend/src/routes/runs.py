@@ -6,6 +6,7 @@ from src.config.database import connection
 from src.config.settings import ARTIFACTS
 from src.constants.enums import Review, Role, Status
 from src.controllers.auth import allow, current
+from src.domain.analysis import validate_rows
 from src.domain.spec import SPEC
 from src.models.identity import User
 from src.models.jobs import Run
@@ -36,10 +37,26 @@ def create(body: RunRequest, db: Session = Depends(connection),
            actor: User = Depends(allow(Role.ADMIN, Role.ANALYST))):
     if not db.get(Dataset, body.dataset_id):
         raise HTTPException(404, '找不到指定的数据批次')
-    item = Run(name=body.name, dataset_id=body.dataset_id, params=normalize_params(body.params), author=actor.username)
+    if body.baseline_run_id:
+        baseline = db.get(Run, body.baseline_run_id)
+        if not baseline:
+            raise HTTPException(404, '找不到要接续的上次运行')
+        if baseline.status != Status.COMPLETE or not baseline.result:
+            raise HTTPException(409, '只能接续已完成的运行结果')
+        baseline_round = baseline.result.get('round')
+        if baseline_round and baseline_round != '—':
+            try:
+                current_round = validate_rows(db.get(Dataset, body.dataset_id).rows)['round']
+            except ValueError as error:
+                raise HTTPException(422, str(error)) from None
+            if current_round != baseline_round:
+                raise HTTPException(422, f'接续运行属于 {baseline_round} 轮，与所选批次 {current_round or "未标注"} 轮不一致')
+    item = Run(name=body.name, dataset_id=body.dataset_id, baseline_run_id=body.baseline_run_id,
+               params=normalize_params(body.params), author=actor.username)
     db.add(item)
     db.flush()
-    record(db, actor.username, 'analysis.queued', item.id, dataset_id=item.dataset_id)
+    record(db, actor.username, 'analysis.queued', item.id, dataset_id=item.dataset_id,
+           baseline_run_id=item.baseline_run_id)
     db.commit()
     wake()
     return views.run(item, detail=True)

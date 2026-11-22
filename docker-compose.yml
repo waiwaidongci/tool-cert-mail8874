@@ -1,14 +1,14 @@
-name: tool-cert-mail-gb0064
+name: metrology-compare-gb0064
 x-runtime: &runtime
   DATABASE_URL: 'mysql+pymysql://analytics:${DB_PASSWORD:-analytics-demo-2611}@db:3306/analytics'
   REDIS_URL: redis://redis:6379/0
-  JWT_SECRET: ${JWT_SECRET:-local-demo-tool-cert-mail-gb0064-signing-2611-only}
+  JWT_SECRET: ${JWT_SECRET:-local-demo-metrology-compare-gb0064-signing-2611-only}
   SEED_DEMO: ${SEED_DEMO:-true}
   ARTIFACT_DIR: /artifacts
 services:
   frontend:
     build: ./frontend
-    container_name: ${COMPOSE_PROJECT_NAME:-tool-cert-mail-gb0064}-frontend
+    container_name: ${COMPOSE_PROJECT_NAME:-metrology-compare-gb0064}-frontend
     ports:
       - '127.0.0.1:${FRONTEND_PORT:-18283}:80'
     depends_on:
@@ -20,8 +20,8 @@ services:
       retries: 20
   backend:
     build: ./backend
-    image: tool-cert-mail-gb0064-runtime:local
-    container_name: ${COMPOSE_PROJECT_NAME:-tool-cert-mail-gb0064}-backend
+    image: metrology-compare-gb0064-runtime:local
+    container_name: ${COMPOSE_PROJECT_NAME:-metrology-compare-gb0064}-backend
     environment: *runtime
     volumes: [artifacts:/artifacts]
     ports:
@@ -35,9 +35,9 @@ services:
       timeout: 3s
       retries: 35
   worker:
-    image: tool-cert-mail-gb0064-runtime:local
+    image: metrology-compare-gb0064-runtime:local
     pull_policy: never
-    container_name: ${COMPOSE_PROJECT_NAME:-tool-cert-mail-gb0064}-worker
+    container_name: ${COMPOSE_PROJECT_NAME:-metrology-compare-gb0064}-worker
     command: [python, -m, src.worker]
     environment: *runtime
     volumes: [artifacts:/artifacts]
@@ -52,7 +52,7 @@ services:
       retries: 20
   db:
     image: mysql:8.0
-    container_name: ${COMPOSE_PROJECT_NAME:-tool-cert-mail-gb0064}-db
+    container_name: ${COMPOSE_PROJECT_NAME:-metrology-compare-gb0064}-db
     environment:
       MYSQL_DATABASE: analytics
       MYSQL_USER: analytics
@@ -68,7 +68,7 @@ services:
       retries: 45
   redis:
     image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME:-tool-cert-mail-gb0064}-redis
+    container_name: ${COMPOSE_PROJECT_NAME:-metrology-compare-gb0064}-redis
     command: [redis-server, --appendonly, 'yes']
     volumes: [redis-data:/data]
     healthcheck:

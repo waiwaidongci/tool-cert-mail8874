@@ -39,6 +39,6 @@ def template():
     buffer = io.StringIO(newline='')
     writer = csv.DictWriter(buffer, fieldnames=fields, extrasaction='ignore')
     writer.writeheader()
-    # The complete representative dataset also works as a reproducible import fixture.
+    # 模板同时是可直接导入的演练批次，便于复现同轮比对结果。
     writer.writerows(demo_rows())
     return '\ufeff' + buffer.getvalue()

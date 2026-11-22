@@ -17,14 +17,10 @@ class Upload(Request):
 class RunRequest(Request):
     dataset_id: int = Field(gt=0)
     name: str = Field(min_length=1, max_length=120)
+    baseline_run_id: int | None = Field(default=None, gt=0)
     params: dict = Field(default_factory=dict)
 
 class ReviewRequest(Request):
     review: Review
     note: str = Field(min_length=1, max_length=500)
     decision: str = Field(default='', max_length=120)
-
-class ScheduleRequest(RunRequest):
-    recipient: str = Field(min_length=1, max_length=100)
-    first_at: datetime
-    repeat_daily: bool = False

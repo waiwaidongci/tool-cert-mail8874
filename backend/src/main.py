@@ -7,7 +7,7 @@ from src.config.database import Base, engine
 from src.config.settings import SEED_DEMO
 from src.domain.spec import SPEC
 from src.middlewares import errors, headers, rate
-from src.routes import distribution, identity, registry, runs
+from src.routes import identity, registry, runs
 from src.utils.wakeup import broker
 
 log = logging.getLogger(__name__)
@@ -31,8 +31,6 @@ headers.install(app)
 rate.install(app)
 for module in (identity, registry, runs):
     app.include_router(module.router)
-if SPEC.get('scheduled'):
-    app.include_router(distribution.router)
 
 
 @app.get('/healthz', include_in_schema=False)
